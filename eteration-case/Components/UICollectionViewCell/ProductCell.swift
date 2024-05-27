@@ -19,14 +19,14 @@ final class ProductCell: UICollectionViewCell {
     weak var delegate: ProductCellDelegate?
     private var product: Product?
     
-    private let imageView: UIImageView = {
+    private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private let favoriteButton: UIButton = {
+    private lazy var favoriteButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "star"), for: .normal)
         button.tintColor = .gray
@@ -34,7 +34,7 @@ final class ProductCell: UICollectionViewCell {
         return button
     }()
     
-    private let priceLabel: UILabel = {
+    private lazy var priceLabel: UILabel = {
         let label = UILabel()
         label.textColor = .systemBlue
         label.font = UIFont.boldSystemFont(ofSize: 16)
@@ -42,7 +42,7 @@ final class ProductCell: UICollectionViewCell {
         return label
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14)
@@ -51,7 +51,7 @@ final class ProductCell: UICollectionViewCell {
         return label
     }()
     
-    let addToCartButton: UIButton = {
+    private lazy var addToCartButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Add to Cart", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -141,4 +141,3 @@ final class ProductCell: UICollectionViewCell {
         favoriteButton.setImage(UIImage(systemName: isFavorite ? "star.fill" : "star"), for: .normal)
     }
 }
-

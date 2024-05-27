@@ -7,12 +7,23 @@
 
 import Foundation
 
-final class NetworkManager {
+protocol NetworkManagerProtocol {
+    func fetchProducts(page: Int, pageSize: Int, completion: @escaping (Result<[Product], Error>) -> Void)
+    
+}
+
+final class NetworkManager: NetworkManagerProtocol {
     static let shared = NetworkManager()
     private init() {}
     
-    func fetchProducts(completion: @escaping (Result<[Product], Error>) -> Void) {
-        guard let url = URL(string: "https://5fc9346b2af77700165ae514.mockapi.io/products") else { return }
+    private let baseURL = "https://5fc9346b2af77700165ae514.mockapi.io"
+    
+    func fetchProducts(page: Int, pageSize: Int, completion: @escaping (Result<[Product], Error>) -> Void) {
+        let urlString = "\(baseURL)/products?page=\(page)&limit=\(pageSize)"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "InvalidURL", code: -1, userInfo: nil)))
+            return
+        }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {

@@ -45,6 +45,8 @@
 		932A516F2C03289C00B8A05B /* HomeFilterHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932A516E2C03289C00B8A05B /* HomeFilterHeader.swift */; };
 		932A51712C0336EF00B8A05B /* FilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932A51702C0336EF00B8A05B /* FilterViewModel.swift */; };
 		932A51732C03464C00B8A05B /* Extension + BasketProduct .swift in Sources */ = {isa = PBXBuildFile; fileRef = 932A51722C03464C00B8A05B /* Extension + BasketProduct .swift */; };
+		932A518D2C04D14500B8A05B /* MockNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932A518C2C04D14500B8A05B /* MockNetworkManager.swift */; };
+		932A518F2C04D18A00B8A05B /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932A518E2C04D18A00B8A05B /* HomeViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +108,8 @@
 		932A516E2C03289C00B8A05B /* HomeFilterHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFilterHeader.swift; sourceTree = "<group>"; };
 		932A51702C0336EF00B8A05B /* FilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewModel.swift; sourceTree = "<group>"; };
 		932A51722C03464C00B8A05B /* Extension + BasketProduct .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension + BasketProduct .swift"; sourceTree = "<group>"; };
+		932A518C2C04D14500B8A05B /* MockNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNetworkManager.swift; sourceTree = "<group>"; };
+		932A518E2C04D18A00B8A05B /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +180,7 @@
 		932A51072C009CAC00B8A05B /* eteration-caseTests */ = {
 			isa = PBXGroup;
 			children = (
+				932A518B2C04D13100B8A05B /* Home */,
 				932A51082C009CAC00B8A05B /* eteration_caseTests.swift */,
 			);
 			path = "eteration-caseTests";
@@ -347,6 +352,15 @@
 				932A51702C0336EF00B8A05B /* FilterViewModel.swift */,
 			);
 			path = Filter;
+			sourceTree = "<group>";
+		};
+		932A518B2C04D13100B8A05B /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				932A518C2C04D14500B8A05B /* MockNetworkManager.swift */,
+				932A518E2C04D18A00B8A05B /* HomeViewModelTests.swift */,
+			);
+			path = Home;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -524,7 +538,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				932A518F2C04D18A00B8A05B /* HomeViewModelTests.swift in Sources */,
 				932A51092C009CAC00B8A05B /* eteration_caseTests.swift in Sources */,
+				932A518D2C04D14500B8A05B /* MockNetworkManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

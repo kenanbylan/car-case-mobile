@@ -5,7 +5,6 @@
 //  Created by Kenan Baylan on 26.05.2024.
 //
 
-import Foundation
 import UIKit
 
 protocol CollectionHeaderViewDelegate: AnyObject {
@@ -17,9 +16,32 @@ final class CollectionHeaderView: UICollectionReusableView {
     
     weak var delegate: CollectionHeaderViewDelegate?
     
-    private let stackView = UIStackView()
-    private let filterLabel = UILabel()
-    private let selectFilterButton = UIButton(type: .system)
+    private lazy var stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private lazy var filterLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Filters"
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var selectFilterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Select Filter", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        button.addTarget(self, action: #selector(selectFilterButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -32,20 +54,7 @@ final class CollectionHeaderView: UICollectionReusableView {
     }
     
     private func setupViews() {
-        stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
-        
-        filterLabel.text = "Filters"
-        filterLabel.font = UIFont.systemFont(ofSize: 16)
-        
-        selectFilterButton.setTitle("Select Filter", for: .normal)
-        selectFilterButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        selectFilterButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
-        selectFilterButton.addTarget(self, action: #selector(selectFilterButtonTapped), for: .touchUpInside)
-        
         stackView.addArrangedSubview(filterLabel)
         stackView.addArrangedSubview(selectFilterButton)
     }
