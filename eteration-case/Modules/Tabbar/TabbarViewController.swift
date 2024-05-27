@@ -16,8 +16,7 @@ final class TabbarViewController: UITabBarController {
         loadBasketTab()
         loadFavoriteTab()
         loadProfileTab()
-        updateBasketBadge()
-        NotificationCenter.default.addObserver(self, selector: #selector(updateBasketBadge), name: .cartUpdated, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(loadBasketTab), name: .cartUpdated, object: nil)
     }
     
     private func tabbarInitView() {
@@ -29,16 +28,25 @@ final class TabbarViewController: UITabBarController {
     
     func loadHomeTab() {
         let navigationController = CustomNavigationController()
-        let homeView = HomeViewController()
+        let homeView = HomeViewController(viewModel: HomeViewModel())
         navigationController.viewControllers.append(homeView)
         navigationController.tabBarItem.image = UIImage(named: Tabbar.home)
         self.addChild(navigationController)
     }
     
+    @objc //TODO: Will be fix
     func loadBasketTab() {
         let navigationController = CustomNavigationController()
         let basket = BasketViewController()
         navigationController.viewControllers.append(basket)
+        
+        let value = CoreDataManager.shared.basketItemCount()
+        if value == 0 {
+            navigationController.tabBarItem.badgeValue = nil
+        } else {
+            navigationController.tabBarItem.badgeValue = String(value)
+        }
+        
         navigationController.tabBarItem.image = UIImage(named: Tabbar.basket)
         self.addChild(navigationController)
     }
@@ -57,13 +65,5 @@ final class TabbarViewController: UITabBarController {
         navigationController.viewControllers.append(profile)
         navigationController.tabBarItem.image = UIImage(named: Tabbar.profile)
         self.addChild(navigationController)
-    }
-    
-    @objc private func updateBasketBadge() {
-        if let tabItems = tabBar.items {
-            let basketTabItem = tabItems[1]
-            let itemCount = CoreDataManager.shared.basketItemCount()
-            basketTabItem.badgeValue = itemCount > 0 ? "\(itemCount)" : nil
-        }
     }
 }

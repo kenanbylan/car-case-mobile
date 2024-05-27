@@ -8,8 +8,23 @@
 import UIKit
 
 final class FavoriteViewController: UIViewController {
-    private let tableView = UITableView()
-    private let refreshControl = UIRefreshControl()
+    
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(FavoriteProductCell.self, forCellReuseIdentifier: FavoriteProductCell.identifier)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.refreshControl = refreshControl
+        return tableView
+    }()
+    
+    private lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshFavorites), for: .valueChanged)
+        return refreshControl
+    }()
+    
     private let viewModel = FavoriteViewModel()
     
     override func viewDidLoad() {
@@ -27,14 +42,7 @@ final class FavoriteViewController: UIViewController {
     }
     
     private func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(FavoriteProductCell.self, forCellReuseIdentifier: FavoriteProductCell.identifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.refreshControl = refreshControl
         view.addSubview(tableView)
-        
-        refreshControl.addTarget(self, action: #selector(refreshFavorites), for: .valueChanged)
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
@@ -57,6 +65,7 @@ final class FavoriteViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDelegate, UITableViewDataSource
 extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

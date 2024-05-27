@@ -10,11 +10,77 @@ import UIKit
 final class BasketItemCell: UITableViewCell {
     static let identifier = "BasketItemCell"
     
-    private let productNameLabel = UILabel()
-    private let productPriceLabel = UILabel()
-    private let decrementButton = UIButton(type: .system)
-    private let incrementButton = UIButton(type: .system)
-    private let quantityLabel = UILabel()
+    private lazy var productNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var productPriceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .systemBlue
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var decrementButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("-", for: .normal)
+        button.layer.cornerRadius = 5
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.gray.cgColor
+        button.addTarget(self, action: #selector(didTapDecrement), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var incrementButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("+", for: .normal)
+        button.layer.cornerRadius = 5
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.gray.cgColor
+        button.addTarget(self, action: #selector(didTapIncrement), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var quantityLabel: UILabel = {
+        let label = UILabel()
+        label.backgroundColor = .systemBlue
+        label.textColor = .white
+        label.textAlignment = .center
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var labelsStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [productNameLabel, productPriceLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private lazy var buttonsStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [decrementButton, quantityLabel, incrementButton])
+        stackView.axis = .horizontal
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private lazy var mainStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [labelsStackView, buttonsStackView])
+        stackView.axis = .horizontal
+        stackView.spacing = 16
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
     
     var onIncrement: (() -> Void)?
     var onDecrement: (() -> Void)?
@@ -29,42 +95,6 @@ final class BasketItemCell: UITableViewCell {
     }
     
     private func setupViews() {
-        productNameLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        productPriceLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        productPriceLabel.textColor = .systemBlue
-        
-        decrementButton.setTitle("-", for: .normal)
-        incrementButton.setTitle("+", for: .normal)
-        decrementButton.layer.cornerRadius = 5
-        decrementButton.layer.borderWidth = 1
-        decrementButton.layer.borderColor = UIColor.gray.cgColor
-        incrementButton.layer.cornerRadius = 5
-        incrementButton.layer.borderWidth = 1
-        incrementButton.layer.borderColor = UIColor.gray.cgColor
-        quantityLabel.backgroundColor = .systemBlue
-        quantityLabel.textColor = .white
-        quantityLabel.textAlignment = .center
-        quantityLabel.layer.cornerRadius = 5
-        quantityLabel.layer.masksToBounds = true
-        
-        decrementButton.addTarget(self, action: #selector(didTapDecrement), for: .touchUpInside)
-        incrementButton.addTarget(self, action: #selector(didTapIncrement), for: .touchUpInside)
-        
-        let labelsStackView = UIStackView(arrangedSubviews: [productNameLabel, productPriceLabel])
-        labelsStackView.axis = .vertical
-        labelsStackView.spacing = 4
-        labelsStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let buttonsStackView = UIStackView(arrangedSubviews: [decrementButton, quantityLabel, incrementButton])
-        buttonsStackView.axis = .horizontal
-        buttonsStackView.spacing = 4
-        buttonsStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let mainStackView = UIStackView(arrangedSubviews: [labelsStackView, buttonsStackView])
-        mainStackView.axis = .horizontal
-        mainStackView.spacing = 16
-        mainStackView.translatesAutoresizingMaskIntoConstraints = false
-        
         contentView.addSubview(mainStackView)
         
         NSLayoutConstraint.activate([
