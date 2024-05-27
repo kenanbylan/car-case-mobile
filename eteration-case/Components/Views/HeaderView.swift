@@ -8,9 +8,26 @@
 import UIKit
 
 final class HeaderView: UIView {
-    private let titleLabel = UILabel()
-    private let backButton = UIButton(type: .system)
-    private let stackView = UIStackView()
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 21)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var backButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.tintColor = .white
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.isHidden = true
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private var backAction: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -25,33 +42,17 @@ final class HeaderView: UIView {
     private func setupView() {
         self.backgroundColor = UIColor.systemBlue
         
-        // Stack View
-        stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(stackView)
-        
-        // Back Button
-        backButton.setImage(UIImage(systemName: "arrow.left"), for: .normal)
-        backButton.tintColor = .white
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.isHidden = true // Initially hidden
-        
-        // Title Label
-        titleLabel.textColor = UIColor.white
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 21)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.textAlignment = .center
-        
-        stackView.addArrangedSubview(backButton)
-        stackView.addArrangedSubview(titleLabel)
+        self.addSubview(backButton)
+        self.addSubview(titleLabel)
         
         NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -10),
+            backButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            backButton.centerYAnchor.constraint(equalTo: self.centerYAnchor,constant: 20),
             backButton.widthAnchor.constraint(equalToConstant: 24),
-            backButton.heightAnchor.constraint(equalToConstant: 24)
+            backButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            titleLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor,constant: 20),
         ])
     }
     
@@ -62,12 +63,15 @@ final class HeaderView: UIView {
         if showBackButton, let backAction = backAction {
             backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
             self.backAction = backAction
+        } else {
+            backButton.removeTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+            self.backAction = nil
         }
+        
+        layoutIfNeeded()
     }
     
     @objc private func backButtonTapped() {
         backAction?()
     }
-    
-    private var backAction: (() -> Void)?
 }

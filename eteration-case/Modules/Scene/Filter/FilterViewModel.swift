@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 
-
 enum SortOption: Int {
     case oldToNew = 0
     case newToOld
@@ -17,32 +16,31 @@ enum SortOption: Int {
 }
 
 final class FilterViewModel {
+    var brands: [String] = ["Honda", "Samsung", "Huawei"]
+    var models: [String] = ["Honda", "12 Pro", "13 Pro Max"]
     
-    private(set) var brands: [String] = ["Honde", "Ford", "Toyota"]
-    private(set) var models: [String] = ["Civic", "Focus", "Corolla"]
+    var filteredBrands: [String] = []
+    var filteredModels: [String] = []
     
     var selectedBrands: [String] = []
     var selectedModels: [String] = []
     var selectedSortOption: SortOption = .oldToNew
     
+    init() {
+        filteredBrands = brands
+        filteredModels = models
+    }
+    
     func filterBrands(searchText: String) {
-        if searchText.isEmpty {
-            brands = ["Honde", "Ford", "Toyota"]
-        } else {
-            brands = ["Honde", "Ford", "Toyota"].filter { $0.lowercased().contains(searchText.lowercased()) }
-        }
+        filteredBrands = searchText.isEmpty ? brands : brands.filter { $0.lowercased().contains(searchText.lowercased()) }
     }
     
     func filterModels(searchText: String) {
-        if searchText.isEmpty {
-            models = ["11", "12 Pro", "13 Pro Max"]
-        } else {
-            models = ["11", "12 Pro", "13 Pro Max"].filter { $0.lowercased().contains(searchText.lowercased()) }
-        }
+        filteredModels = searchText.isEmpty ? models : models.filter { $0.lowercased().contains(searchText.lowercased()) }
     }
     
     func toggleSelection(for item: String, in tableView: UITableView) {
-        if tableView == (tableView as? FilterViewController)?.brandTableView {
+        if tableView.restorationIdentifier == "brandTableView" {
             if let index = selectedBrands.firstIndex(of: item) {
                 selectedBrands.remove(at: index)
             } else {
@@ -58,10 +56,6 @@ final class FilterViewModel {
     }
     
     func isSelected(item: String, for tableView: UITableView) -> Bool {
-        if tableView == (tableView as? FilterViewController)?.brandTableView {
-            return selectedBrands.contains(item)
-        } else {
-            return selectedModels.contains(item)
-        }
+        return tableView.restorationIdentifier == "brandTableView" ? selectedBrands.contains(item) : selectedModels.contains(item)
     }
 }

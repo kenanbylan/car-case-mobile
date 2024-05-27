@@ -11,107 +11,116 @@ protocol FilterViewControllerDelegate: AnyObject {
     func didApplyFilters(brands: [String], models: [String], sortOption: SortOption)
 }
 
-final class FilterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
-    
+final class FilterViewController: UIViewController {
     weak var delegate: FilterViewControllerDelegate?
     private let viewModel = FilterViewModel()
     
-    private let sortLabel = UILabel()
-    private let sortStackView = UIStackView()
-    private let oldToNewButton = UIButton(type: .system)
-    private let newToOldButton = UIButton(type: .system)
-    private let priceHighToLowButton = UIButton(type: .system)
-    private let priceLowToHighButton = UIButton(type: .system)
+    private lazy var sortLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Sort By"
+        label.font = .boldSystemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
     
-    private let brandLabel = UILabel()
-     let brandSearchBar = UISearchBar()
-     let brandTableView = UITableView()
+    private lazy var sortStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
     
-    private let modelLabel = UILabel()
-    private let modelSearchBar = UISearchBar()
-    private let modelTableView = UITableView()
+    private lazy var oldToNewButton: UIButton = createSortButton(title: "Old to new", tag: SortOption.oldToNew.rawValue)
+    private lazy var newToOldButton: UIButton = createSortButton(title: "New to old", tag: SortOption.newToOld.rawValue)
+    private lazy var priceHighToLowButton: UIButton = createSortButton(title: "Price high to low", tag: SortOption.priceHighToLow.rawValue)
+    private lazy var priceLowToHighButton: UIButton = createSortButton(title: "Price low to high", tag: SortOption.priceLowToHigh.rawValue)
     
-    private let applyButton = UIButton(type: .system)
+    private lazy var brandLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Brand"
+        label.font = .boldSystemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var brandSearchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "Search"
+        searchBar.delegate = self
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        return searchBar
+    }()
+    
+    private lazy var brandTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "brandCell")
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.restorationIdentifier = "brandTableView"
+        return tableView
+    }()
+    
+    private lazy var modelLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Model"
+        label.font = .boldSystemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var modelSearchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "Search"
+        searchBar.delegate = self
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        return searchBar
+    }()
+    
+    private lazy var modelTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "modelCell")
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.restorationIdentifier = "modelTableView"
+        return tableView
+    }()
+    
+    private lazy var applyButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Apply", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 5
+        button.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupViews()
         setupConstraints()
+        loadSelectedFilters()
     }
     
     private func setupViews() {
-        sortLabel.text = "Sort By"
-        sortLabel.font = .boldSystemFont(ofSize: 16)
-        sortLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(sortLabel)
-        
-        sortStackView.axis = .vertical
-        sortStackView.spacing = 8
-        sortStackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(sortStackView)
         
-        oldToNewButton.setTitle("Old to new", for: .normal)
-        oldToNewButton.tag = 0
-        oldToNewButton.addTarget(self, action: #selector(sortOptionChanged(_:)), for: .touchUpInside)
-        
-        newToOldButton.setTitle("New to old", for: .normal)
-        newToOldButton.tag = 1
-        newToOldButton.addTarget(self, action: #selector(sortOptionChanged(_:)), for: .touchUpInside)
-        
-        priceHighToLowButton.setTitle("Price high to low", for: .normal)
-        priceHighToLowButton.tag = 2
-        priceHighToLowButton.addTarget(self, action: #selector(sortOptionChanged(_:)), for: .touchUpInside)
-        
-        priceLowToHighButton.setTitle("Price low to high", for: .normal)
-        priceLowToHighButton.tag = 3
-        priceLowToHighButton.addTarget(self, action: #selector(sortOptionChanged(_:)), for: .touchUpInside)
-        
         [oldToNewButton, newToOldButton, priceHighToLowButton, priceLowToHighButton].forEach { button in
-            button.titleLabel?.font = .systemFont(ofSize: 14)
-            button.setTitleColor(.black, for: .normal)
-            button.setTitleColor(.systemBlue, for: .selected)
             sortStackView.addArrangedSubview(button)
         }
         
-        brandLabel.text = "Brand"
-        brandLabel.font = .boldSystemFont(ofSize: 16)
-        brandLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(brandLabel)
-        
-        brandSearchBar.placeholder = "Search"
-        brandSearchBar.delegate = self
-        brandSearchBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(brandSearchBar)
-        
-        brandTableView.delegate = self
-        brandTableView.dataSource = self
-        brandTableView.register(UITableViewCell.self, forCellReuseIdentifier: "brandCell")
-        brandTableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(brandTableView)
-        
-        modelLabel.text = "Model"
-        modelLabel.font = .boldSystemFont(ofSize: 16)
-        modelLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(modelLabel)
-        
-        modelSearchBar.placeholder = "Search"
-        modelSearchBar.delegate = self
-        modelSearchBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(modelSearchBar)
-        
-        modelTableView.delegate = self
-        modelTableView.dataSource = self
-        modelTableView.register(UITableViewCell.self, forCellReuseIdentifier: "modelCell")
-        modelTableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(modelTableView)
-        
-        applyButton.setTitle("Apply", for: .normal)
-        applyButton.setTitleColor(.white, for: .normal)
-        applyButton.backgroundColor = .systemBlue
-        applyButton.layer.cornerRadius = 5
-        applyButton.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
-        applyButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(applyButton)
     }
     
@@ -156,11 +165,30 @@ final class FilterViewController: UIViewController, UITableViewDelegate, UITable
         ])
     }
     
+    private func createSortButton(title: String, tag: Int) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle(title, for: .normal)
+        button.tag = tag
+        button.titleLabel?.font = .systemFont(ofSize: 14)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .gray
+        button.layer.cornerRadius = 5
+        button.addTarget(self, action: #selector(sortOptionChanged(_:)), for: .touchUpInside)
+        return button
+    }
+    
     @objc private func sortOptionChanged(_ sender: UIButton) {
-        [oldToNewButton, newToOldButton, priceHighToLowButton, priceLowToHighButton].forEach { $0.isSelected = false }
+        [oldToNewButton, newToOldButton, priceHighToLowButton, priceLowToHighButton].forEach {
+            $0.isSelected = false
+            $0.backgroundColor = .gray
+            $0.setTitleColor(.white, for: .normal)
+        }
         sender.isSelected = true
+        sender.backgroundColor = .systemBlue
+        sender.setTitleColor(.white, for: .normal)
         viewModel.selectedSortOption = SortOption(rawValue: sender.tag) ?? .oldToNew
     }
+    
     
     @objc private func applyButtonTapped() {
         delegate?.didApplyFilters(
@@ -171,8 +199,31 @@ final class FilterViewController: UIViewController, UITableViewDelegate, UITable
         dismiss(animated: true, completion: nil)
     }
     
-    // MARK: - UITableViewDataSource
+    private func loadSelectedFilters() {
+        switch viewModel.selectedSortOption {
+        case .oldToNew:
+            oldToNewButton.isSelected = true
+            oldToNewButton.backgroundColor = .systemBlue
+            oldToNewButton.setTitleColor(.white, for: .normal)
+        case .newToOld:
+            newToOldButton.isSelected = true
+            newToOldButton.backgroundColor = .systemBlue
+            newToOldButton.setTitleColor(.white, for: .normal)
+        case .priceHighToLow:
+            priceHighToLowButton.isSelected = true
+            priceHighToLowButton.backgroundColor = .systemBlue
+            priceHighToLowButton.setTitleColor(.white, for: .normal)
+        case .priceLowToHigh:
+            priceLowToHighButton.isSelected = true
+            priceLowToHighButton.backgroundColor = .systemBlue
+            priceLowToHighButton.setTitleColor(.white, for: .normal)
+        }
+    }
     
+}
+
+// MARK: - UITableViewDataSource
+extension FilterViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == brandTableView {
             return viewModel.brands.count
@@ -188,22 +239,26 @@ final class FilterViewController: UIViewController, UITableViewDelegate, UITable
         cell.accessoryType = viewModel.isSelected(item: item, for: tableView) ? .checkmark : .none
         return cell
     }
-    
-    // MARK: - UITableViewDelegate
-    
+}
+
+// MARK: - UITableViewDelegate
+extension FilterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = tableView == brandTableView ? viewModel.brands[indexPath.row] : viewModel.models[indexPath.row]
         viewModel.toggleSelection(for: item, in: tableView)
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }
-    
-    // MARK: - UISearchBarDelegate
-    
+}
+
+// MARK: - UISearchBarDelegate
+extension FilterViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar == brandSearchBar {
             viewModel.filterBrands(searchText: searchText)
+            brandTableView.reloadData()
         } else {
             viewModel.filterModels(searchText: searchText)
+            modelTableView.reloadData()
         }
     }
 }

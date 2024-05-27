@@ -7,14 +7,32 @@
 
 import Foundation
 import UIKit
-
-class FavoriteProductCell: UITableViewCell {
+import Kingfisher
+final class FavoriteProductCell: UITableViewCell {
     
     static let identifier = "FavoriteProductCell"
     
-    private let nameLabel = UILabel()
-    private let priceLabel = UILabel()
-    private let productImageView = UIImageView()
+    private lazy var nameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var priceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = .systemGray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var productImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -27,17 +45,8 @@ class FavoriteProductCell: UITableViewCell {
     }
     
     private func setupViews() {
-        nameLabel.font = UIFont.systemFont(ofSize: 16)
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(nameLabel)
-        
-        priceLabel.font = UIFont.systemFont(ofSize: 14)
-        priceLabel.textColor = .systemGray
-        priceLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(priceLabel)
-        
-        productImageView.contentMode = .scaleAspectFit
-        productImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(productImageView)
     }
     

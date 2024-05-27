@@ -9,18 +9,100 @@ import UIKit
 import Kingfisher
 
 final class DetailViewController: UIViewController {
+    private var viewModel: DetailViewModelProtocol
     
-    private var viewModel: DetailViewModel!
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
     
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let imageView = UIImageView()
-    private let favoriteButton = UIButton(type: .system)
-    private let titleLabel = UILabel()
-    private let descriptionLabel = UILabel()
-    private let priceLabel = UILabel()
-    private let addToCartButton = UIButton(type: .system)
-    private let priceStackView = UIStackView()
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.backgroundColor = .lightGray
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var favoriteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "star"), for: .normal)
+        button.tintColor = .gray
+        button.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 24)
+        label.numberOfLines = 1
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var priceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.textColor = .systemBlue
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var addToCartButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Add to Cart", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 5
+        button.addTarget(self, action: #selector(addToCartButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var priceStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [priceLabel, addToCartButton])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.alignment = .center
+        stackView.distribution = .fill
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private lazy var mainStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel, descriptionLabel, priceStackView])
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.alignment = .fill
+        stackView.distribution = .equalSpacing
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    init(viewModel: DetailViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,25 +111,20 @@ final class DetailViewController: UIViewController {
         setupViews()
         setupConstraints()
         configureView()
-        addCustomHeader(title: viewModel.product.name,showBackButton: true) {
+        
+        addCustomHeader(title: viewModel.productName, showBackButton: true) {
             self.navigationController?.popViewController(animated: true)
         }
-    }
-    
-    init(viewModel: DetailViewModel) {
-        super.init(nibName: nil, bundle: nil)
-        self.viewModel = viewModel
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        
+        viewModel.favoriteStatusChanged = { [weak self] in
+            self?.updateFavoriteButton()
+        }
     }
     
     private func setupScrollView() {
         view.addSubview(scrollView)
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(mainStackView)
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -64,91 +141,54 @@ final class DetailViewController: UIViewController {
     }
     
     private func setupViews() {
-        imageView.contentMode = .scaleAspectFit
-        imageView.backgroundColor = .lightGray
-        contentView.addSubview(imageView)
-        
-        favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
-        favoriteButton.tintColor = .gray
-        contentView.addSubview(favoriteButton)
-        
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        titleLabel.numberOfLines = 1
-        contentView.addSubview(titleLabel)
-        
-        descriptionLabel.font = UIFont.systemFont(ofSize: 16)
-        descriptionLabel.numberOfLines = 0
-        contentView.addSubview(descriptionLabel)
-        
-        priceLabel.font = UIFont.boldSystemFont(ofSize: 18)
-        priceLabel.textColor = .systemBlue
-        
-        addToCartButton.setTitle("Add to Cart", for: .normal)
-        addToCartButton.setTitleColor(.white, for: .normal)
-        addToCartButton.backgroundColor = .systemBlue
-        addToCartButton.layer.cornerRadius = 5
-        addToCartButton.addTarget(self, action: #selector(addToCartButtonTapped), for: .touchUpInside) // Add action to the button
-        
-        priceStackView.axis = .horizontal
-        priceStackView.spacing = 8
-        priceStackView.alignment = .center
-        priceStackView.distribution = .fill
-        priceStackView.addArrangedSubview(priceLabel)
-        priceStackView.addArrangedSubview(addToCartButton)
-        
-        contentView.addSubview(priceStackView)
+        contentView.addSubview(mainStackView)
+        imageView.addSubview(favoriteButton)
     }
     
     private func setupConstraints() {
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        favoriteButton.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        addToCartButton.translatesAutoresizingMaskIntoConstraints = false
-        priceStackView.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 70),
-            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 70),
+            mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            
             imageView.heightAnchor.constraint(equalToConstant: 200),
+            addToCartButton.heightAnchor.constraint(equalToConstant: 40),
+            addToCartButton.widthAnchor.constraint(equalToConstant: view.frame.width / 2.5),
             
             favoriteButton.topAnchor.constraint(equalTo: imageView.topAnchor, constant: 8),
-            favoriteButton.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -8),
-            
-            titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            
-            priceStackView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16),
-            priceStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            priceStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            priceStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-            
-            addToCartButton.heightAnchor.constraint(equalToConstant: 44)
+            favoriteButton.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -8)
         ])
     }
     
     private func configureView() {
-        titleLabel.text = viewModel.product.name
-        descriptionLabel.text = viewModel.product.description
-        priceLabel.text = "Price: \(viewModel.product.price) ₺"
+        titleLabel.text = viewModel.productName
+        descriptionLabel.text = viewModel.productDescription
+        priceLabel.text = viewModel.productPrice
         
-        if let url = viewModel.product.imageURL {
+        if let url = viewModel.productImageURL {
             imageView.kf.setImage(with: url)
         }
+        
+        updateFavoriteButton()
     }
     
-    @objc private func addToCartButtonTapped() {
-        BasketViewModel.shared.addToCart(product: viewModel.product)
+    @objc
+    private func addToCartButtonTapped() {
+        viewModel.addToCart()
         
         let alert = UIAlertController(title: "Success", message: "Product added to cart.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
+    
+    private func updateFavoriteButton() {
+        let isFavorite = viewModel.isFavorite
+        favoriteButton.setImage(UIImage(systemName: isFavorite ? "star.fill" : "star"), for: .normal)
+        favoriteButton.tintColor = isFavorite ? .systemYellow : .gray
+    }
+    
+    @objc
+    private func favoriteButtonTapped() { }
+    
 }
